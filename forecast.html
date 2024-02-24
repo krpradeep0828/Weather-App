@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>5-Day Weather Forecast</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body class="fore">
+    <header>
+        <h1 class="heading">Next 5 Days Weather Forecast</h1>
+        <div class="forecast-container">
+            <!-- Forecast data will be displayed here -->
+        </div>
+        <a href="http://127.0.0.1:5500/index.html" class="back">Back to Main</a>
+    </header>
+
+    <script>
+        const apikey = "ec2ea51ef18800869ebff58663873966";
+        const apiUrl = "https://api.openweathermap.org/data/2.5/";
+        const params = new URLSearchParams(window.location.search);
+        const city = params.get('city');
+        const forecastContainer = document.querySelector(".forecast-container");
+
+        async function fetchForecast(city) {
+            const response = await fetch(`${apiUrl}forecast?&units=metric&q=${city}&appid=${apikey}`);
+            if (response.status == 404) {
+                console.error('City not found');
+            } else {
+                const data = await response.json();
+                displayForecast(data);
+            }
+        }
+
+        function displayForecast(data) {
+            const forecastList = data.list;
+            for (let i = 0; i < forecastList.length; i += 8) { // Displaying forecast for every 24 hours
+                const forecast = forecastList[i];
+                const forecastDate = new Date(forecast.dt * 1000);
+                const forecastDay = forecastDate.toLocaleDateString("en-US", { weekday: "short" });
+                const forecastTemp = Math.round(forecast.main.temp) + "°C";
+                //const forecastTempMin = Math.round(forecast.main.temp_min) + "°C";
+                //const forecastTempMax = Math.round(forecast.main.temp_max) + "°C";
+                // console.log(data.main.temp_min, "datfghjkl")
+                // console.log(data.main.temp_max, "datfkjhgf")
+                const forecastWeatherType = forecast.weather[0].main.toLowerCase();
+                const forecastIcon = `./images/${forecastWeatherType}.png`;
+
+                const forecastItem = document.createElement("div");
+                forecastItem.classList.add("forecast-item");
+                forecastItem.innerHTML = `
+                    <div class="forecast-day">${forecastDay}</div>
+                    <img src="${forecastIcon}" class="forecast-icon">
+                    <div class="forecast-temp">${forecastTemp}</div>
+                `;
+                forecastContainer.appendChild(forecastItem);
+            }
+        }
+
+        fetchForecast(city);
+
+    </script>
+</body>
+
+</html>
